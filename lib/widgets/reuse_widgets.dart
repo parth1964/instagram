@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class ReuseWidgets {
- static Widget textfield(
+  static Widget textfield(
       {required final TextEditingController controller,
       required final String hinttext,
       required final TextInputType textinput,
-      required bool obsecure,
+      bool obsecure = false,
       required BuildContext context}) {
     return TextFormField(
       controller: controller,
