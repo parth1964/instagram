@@ -7,8 +7,13 @@ import 'package:image_picker/image_picker.dart';
 import 'package:instagram/resources/auth_method.dart';
 import 'package:instagram/screens/login_screen.dart';
 import 'package:instagram/utils/colors.dart';
+import 'package:instagram/utils/global_vari.dart';
 import 'package:instagram/utils/utils.dart';
 import 'package:instagram/widgets/reuse_widgets.dart';
+
+import '../responsive/mobile_screen_layout.dart';
+import '../responsive/responsive_layout.dart';
+import '../responsive/web_screen_layout.dart';
 
 class SignupSceen extends StatefulWidget {
   const SignupSceen({Key? key}) : super(key: key);
@@ -26,7 +31,7 @@ class _SignupSceenState extends State<SignupSceen> {
 
   final usernameController = TextEditingController();
 
-  // bool _isLoading = false;
+  bool _isLoading = false;
 
   clearController() {
     textController.clear();
@@ -45,9 +50,9 @@ class _SignupSceenState extends State<SignupSceen> {
   }
 
   void signupUser() async {
-    // setState(() {
-    //   _isLoading = true;
-    // });
+    setState(() {
+      _isLoading = true;
+    });
     String res = await AuthMethods().signupUser(
         file: image!,
         email: textController.text,
@@ -56,13 +61,20 @@ class _SignupSceenState extends State<SignupSceen> {
         username: usernameController.text);
     clearController();
 
+    print(res);
+
     if (res != "Success") {
       showsnackBar(res, context);
-      // setState(() {
-      //   _isLoading = false;
-      // });
+      setState(() {
+        _isLoading = false;
+      });
     } else {
-      Get.to(LoginScreen());
+      Get.offAll(
+        () => const ResponsiveLayout(
+          mobilescreenlayout: MobileScreenLayout(),
+          webscreenLayout: WebScreenLayout(),
+        ),
+      );
     }
   }
 
@@ -71,7 +83,10 @@ class _SignupSceenState extends State<SignupSceen> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: MediaQuery.of(context).size.width > webScreensize
+              ? EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 2.5)
+              : EdgeInsets.symmetric(horizontal: 30),
           width: double.infinity,
           child: SingleChildScrollView(
             child: Column(
@@ -144,7 +159,13 @@ class _SignupSceenState extends State<SignupSceen> {
                 InkWell(
                   onTap: signupUser,
                   child: Container(
-                    child: Text('Sign up'),
+                    child: _isLoading == false
+                        ? const Text('Sign up')
+                        : const Center(
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
+                            ),
+                          ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12),

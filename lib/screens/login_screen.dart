@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:instagram/resources/auth_method.dart';
+import 'package:instagram/responsive/mobile_screen_layout.dart';
+import 'package:instagram/responsive/responsive_layout.dart';
+import 'package:instagram/responsive/web_screen_layout.dart';
 import 'package:instagram/screens/signup_screen.dart';
 import 'package:instagram/utils/colors.dart';
+import 'package:instagram/utils/global_vari.dart';
 import 'package:instagram/utils/utils.dart';
 import 'package:instagram/widgets/reuse_widgets.dart';
-
-import 'homescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -21,14 +23,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final passwordController = TextEditingController();
 
+  bool _isLoading = false;
+
   void loginuser() async {
+    setState(() {
+      _isLoading = true;
+    });
     String res = await AuthMethods().loginUser(
         email: textController.text, password: passwordController.text);
 
     if (res != "success") {
       showsnackBar(res, context);
-    }else{
-      Get.to(HomeScreen());
+      setState(() {
+        _isLoading = false;
+      });
+    } else {
+      Get.offAll(
+        () => const ResponsiveLayout(
+          mobilescreenlayout: MobileScreenLayout(),
+          webscreenLayout: WebScreenLayout(),
+        ),
+      );
     }
   }
 
@@ -37,7 +52,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 30),
+          padding: MediaQuery.of(context).size.width > webScreensize
+              ? EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width / 2.5)
+              : EdgeInsets.symmetric(horizontal: 30),
           width: double.infinity,
           child: SingleChildScrollView(
             child: Column(
@@ -71,7 +89,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 InkWell(
                   onTap: loginuser,
                   child: Container(
-                    child: Text('Log In'),
+                    child: _isLoading == false
+                        ? Text('Log In')
+                        : CircularProgressIndicator(
+                            color: primaryColor,
+                          ),
                     width: double.infinity,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 12),
